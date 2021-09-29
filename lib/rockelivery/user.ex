@@ -8,10 +8,11 @@ defmodule Rockelivery.User do
 
   @primary_key {:id, :binary_id, autogenerate: true}
 
-  @required_params [:age, :address, :cep, :cpf, :email, :password, :name]
+  @params [:age, :address, :cep, :cpf, :email, :password, :name, :city, :UF]
+  @required_params @params -- [:city, :UF]
   @update_params @required_params -- [:password]
 
-  @derive {Jason.Encoder, only: [:name, :id, :age, :cpf, :address, :email]}
+  @derive {Jason.Encoder, only: @params ++ [:id]}
 
   schema "users" do
     field :age, :integer
@@ -22,6 +23,8 @@ defmodule Rockelivery.User do
     field :password, :string, virtual: true
     field :password_hash, :string
     field :name, :string
+    field :city, :string
+    field :UF, :string
 
     has_many :orders, Order
 
@@ -30,7 +33,7 @@ defmodule Rockelivery.User do
 
   def changeset(params) do
     %__MODULE__{}
-    |> change(params, @required_params)
+    |> change(params, @required_params, @params)
   end
 
   def changeset(struct, params) do
@@ -38,9 +41,11 @@ defmodule Rockelivery.User do
     |> change(params, @update_params)
   end
 
-  def change(struct, params, field) do
+  def build(changeset), do: apply_action(changeset, :create)
+
+  def change(struct, params, field, cast_params \\ @update_params) do
     struct
-    |> cast(params, field)
+    |> cast(params, cast_params)
     |> validate_required(field)
     |> validate_length(:password, is: 6)
     |> validate_length(:cep, is: 8)
