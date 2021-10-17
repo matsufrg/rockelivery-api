@@ -13,6 +13,8 @@ defmodule RockeliveryWeb.Router do
     plug Pipeline
   end
 
+  # USERS WITH AUTHORIZATION
+
   scope "/api", RockeliveryWeb do
     pipe_through [:auth, :api]
 
@@ -22,6 +24,8 @@ defmodule RockeliveryWeb.Router do
 
     post "/orders", OrdersController, :create
   end
+
+  # ROUTES WITHOUT AUTHORIZATION
 
   scope "/api", RockeliveryWeb do
     pipe_through :api
